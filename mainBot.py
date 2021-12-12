@@ -1,15 +1,20 @@
+from logging import currentframe
 import os
 import discord
 from discord.ext import commands, tasks
 from discord.embeds import Embed
 from dotenv import load_dotenv
-import asyncio
+import datetime
 import json
+
 load_dotenv()
+
+
+global currentAssignments # future with mongo database cuz quick and lightweight
 
 # Setting Classes for Discord Bot
 
-class AssignmentClass():
+class AssignmentClass:
     def __init__(self,subjectToDo,whatToDo,deadLine,*args, **kwargs):
         self.subjectToDo = subjectToDo
         self.whatToDo = whatToDo
@@ -17,10 +22,18 @@ class AssignmentClass():
         self.whenAlert = kwargs.get('whenAlert', deadLine) #subtract 2 hours by default
         
     @classmethod 
-    async def addReminder(subjectToDo,whatToDo,deadLine,whenAlert):
-        
+    def addReminder(self):
+        assignmentRmider = json.dumps({
+            'Subject': self.subjectToDo,
+            'WhatToDo': self.whatToDo,
+            'Deadline': self.deadLine,
+            'WhenAlert':self.whenAlert
+        })
         pass
 
+
+class TableOfAssinments():
+    pass
 # Commands of Discord Bot
 
 
