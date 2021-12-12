@@ -5,6 +5,7 @@ from discord.ext import commands, tasks
 from discord.embeds import Embed
 from dotenv import load_dotenv
 import datetime
+import requests
 import json
 
 load_dotenv()
