@@ -7,9 +7,10 @@ from dotenv import load_dotenv
 import datetime
 import requests
 import json
+from pymongo import MongoClient, mongo_client
+import pymongo
 
 load_dotenv()
-
 
 global currentAssignments # future with mongo database cuz quick and lightweight
 
@@ -30,14 +31,17 @@ class AssignmentClass:
             'Deadline': self.deadLine,
             'WhenAlert':self.whenAlert
         })
+        
         pass
-
+class MongoDatabase:
+    @classmethod
+    def get_database():
+        client = MongoClient(os.getenv("DOTENV.CONNECTION_STRING"))
+        return 
+        pass
 
 class TableOfAssinments():
     pass
-# Commands of Discord Bot
-
-
 
 # Start of the Bot
 
@@ -50,5 +54,13 @@ async def on_ready():
     print(f"BOT ID: {bot.user.id}")
     print("------------------------------")
     await bot.change_presence(activity=discord.Game(name="!help")) 
+
+# Commands of Discord Bot
+@bot.command()
+
+async def addReminder(ctx,subject,what,deadline,whenAlert):
+    AssignmentClass.addReminder(subject,what,deadline,whenAlert)
+    await ctx.send(f"Reminder Added: {subject} | {what} | {deadline} | {whenAlert}")
     
+
 bot.run(os.getenv("DOTENV.TOKEN"))
