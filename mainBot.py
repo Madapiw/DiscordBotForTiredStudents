@@ -12,36 +12,44 @@ import pymongo
 
 load_dotenv()
 
-global currentAssignments # future with mongo database cuz quick and lightweight
 
-# Setting Classes for Discord Bot
-
+# Setting Classes and functions for Discord Bot
+            
+            
 class AssignmentClass:
-    def __init__(self,subjectToDo,whatToDo,deadLine,*args, **kwargs):
+    def __init__(self,subjectToDo,whatToDo,deadLine,whenAlert):
         self.subjectToDo = subjectToDo
         self.whatToDo = whatToDo
         self.deadLine = deadLine
-        self.whenAlert = kwargs.get('whenAlert', deadLine) #subtract 2 hours by default
+        self.whenAlert = whenAlert #subtract 2 hours by default
         
-    @classmethod 
-    def addReminder(self):
-        assignmentRmider = json.dumps({
-            'Subject': self.subjectToDo,
-            'WhatToDo': self.whatToDo,
-            'Deadline': self.deadLine,
-            'WhenAlert':self.whenAlert
-        })
-        
-        pass
-class MongoDatabase:
-    @classmethod
-    def get_database():
+    async def addReminder(self):
+        try:
+            assignmentRemider = {
+                'subjectToDo': self.subjectToDo,
+                'whatToDo': self.whatToDo,
+                'deadline' : self.deadLine,
+                'whenAlert': self.whenAlert
+            }
+            print(assignmentRemider)
+            StudentReminders = get_database()
+            StudentReminders.insert_one(assignmentRemider)
+            print("Added to DB")
+        except Exception:
+            Exception("Adding to DB failed")
+            
+            
+#function for conecting to db       
+def get_database():
+    try:
         client = MongoClient(os.getenv("DOTENV.CONNECTION_STRING"))
-        return 
-        pass
+        db = client["DiscordBotForTiredStudentsDatabase"]
+        StudentReminders = db["StudentReminders"]
+        print('Connected to DB')
+        return StudentReminders
+    except Exception:
+        Exception('Failed to connect to DB')        
 
-class TableOfAssinments():
-    pass
 
 # Start of the Bot
 
@@ -56,11 +64,10 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game(name="!help")) 
 
 # Commands of Discord Bot
-@bot.command()
-
-async def addReminder(ctx,subject,what,deadline,whenAlert):
-    AssignmentClass.addReminder(subject,what,deadline,whenAlert)
-    await ctx.send(f"Reminder Added: {subject} | {what} | {deadline} | {whenAlert}")
-    
+@bot.command(name='addReminder', help="use !addReminder [Subject] [what to do] [time to do it] [when you want to be alerted about it], please use date format [dd.mm.yyyy:HH:MM] for when and alert")
+async def DCaddReminder(ctx,subjectToDo,whatToDo,deadLine,whenAlert,):
+    Assignment = AssignmentClass(subjectToDo,whatToDo,deadLine,whenAlert)
+    await Assignment.addReminder()
+    await ctx.send(f"Reminder Added: {subjectToDo} | {whatToDo} | {deadLine} | {whenAlert}")
 
 bot.run(os.getenv("DOTENV.TOKEN"))
